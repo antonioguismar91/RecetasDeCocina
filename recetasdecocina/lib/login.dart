@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'register.dart';
+import 'user_dashboard.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -126,12 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () {
                   // Navegar a la pantalla de cambiar contraseña
-                  /*Navigator.push(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ResetScreen(),
                     ),
-                  );*/
+                  );
                 },
                 child: Text("¿Olvidaste tu contraseña? Cámbiala aquí"),
               ),
