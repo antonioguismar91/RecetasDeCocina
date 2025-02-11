@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "920670201384",
+    "firebase_url": "https://recetasdecocina-6a71a-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "recetasdecocina-6a71a",
+    "storage_bucket": "recetasdecocina-6a71a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:920670201384:android:8442315a4bf0f9f49a371d",
+        "android_client_info": {
+          "package_name": "com.example.recetasdecocina"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOxtp3ttTtElslHu0CrhYOP6e_frKoUBk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
