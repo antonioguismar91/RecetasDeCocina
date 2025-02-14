@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'register.dart';
 import 'user_dashboard.dart';
+import 'menu_recetas.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -30,12 +31,12 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         // Redirigir a la pantalla de interfaz tras iniciar sesión
-        /*Navigator.pushReplacement(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ListScreen(),
+            builder: (context) => menu_recetas(),
           ),
-        );*/
+        );
       } on FirebaseAuthException catch (e) {
         String errorMessage;
 
