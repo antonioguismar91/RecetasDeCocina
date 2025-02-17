@@ -18,7 +18,7 @@ class menu_recetas extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'CocinApp',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
@@ -89,11 +89,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 destinations: [
                   NavigationRailDestination(
                     icon: Icon(Icons.home),
-                    label: Text('Home'),
+                    label: Text('Inicio'),
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
+                    label: Text('Favoritos'),
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.add),
@@ -138,7 +138,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
     if (appState.favorites.isEmpty) {
       return Center(
-        child: Text('No favorites yet.'),
+        child: Text('No hay favoritos.'),
       );
     }
 
@@ -168,12 +168,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
 }
 
 class SearchRecetaPage extends StatefulWidget {
+
   @override
   _SearchRecetaPageState createState() => _SearchRecetaPageState();
 }
 
 class _SearchRecetaPageState extends State<SearchRecetaPage> {
   List<Receta> _recetas = [];
+  final TextEditingController search_controller = TextEditingController();
+
 
   @override
   void initState() {
@@ -211,7 +214,24 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
     return Center(
       child: Column(
         children: [
-          Text("Buscar Recetas"),
+          Text("CocinApp"),
+          Container(
+            width: 600,
+            child: TextField(
+              controller: search_controller,
+              decoration: const InputDecoration(
+                labelText: 'Buscar receta',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search), // Añadido el icono de lupa
+              ),
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.5,  // 80% del ancho
+            height: MediaQuery.of(context).size.height * 0.2, // 50% del alto
+            child: DropdownCategoria(),
+
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _recetas.length,
@@ -223,7 +243,7 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
                 icon: Icon(Icons.favorite), // Ícono del botón
                 color: Colors.red,
                 onPressed: () {
-                print("Añaddir a favoritos");
+                print("Añadir a favoritos");
                 }),
                   subtitle: Text('Categoría: ${receta.categoria}'),
 
