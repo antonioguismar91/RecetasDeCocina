@@ -1,14 +1,28 @@
 class Receta {
   // Atributos
   String nombre;
-  List<String> ingredientes;
-  String contenido;
+  String ingredientes;
+  String preparacion;
   String categoria;
-  Receta(this.nombre, this.ingredientes, this.contenido, this.categoria);
+  Receta({
+    required this.nombre,
+    required this.ingredientes,
+    required this.preparacion,
+    required this.categoria,
+  });
   // Constructor
   // Método
+  // Método para crear una receta a partir de un mapa de Firebase
+  factory Receta.fromMap(Map<dynamic, dynamic> map) {
+    return Receta(
+      nombre: map['nombre'] ?? '',
+      ingredientes: map['ingredientes'] ?? '',
+      preparacion: map['preparacion'] ?? '',
+      categoria: map['categoria'] ?? '',
+    );
+  }
 }
-
+/*
 
 void main() {
   List<String> lista = [];
@@ -18,6 +32,6 @@ void main() {
   Receta p = Receta( "ennove",lista,"ff","cat");
 }
 
-
+*/
 
 

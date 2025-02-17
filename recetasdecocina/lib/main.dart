@@ -4,7 +4,7 @@ import 'firebase_options.dart';
 import 'login.dart'; // Archivo para iniciar sesión
 import 'menu_recetas.dart';
 import 'register.dart'; // Archivo para registrarse
-
+import 'Add_receta.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: menu_recetas(),
+      home: MainScreen(),
     );
   }
 }
