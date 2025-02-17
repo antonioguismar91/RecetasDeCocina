@@ -1,6 +1,10 @@
 import 'package:english_words/english_words.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recetasdecocina/Add_receta.dart';
+
+import 'Receta.dart';
 
 void main() {
   runApp(menu_recetas());
@@ -28,6 +32,7 @@ class menu_recetas extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   var favorites = <WordPair>[];
   var current = WordPair.random();
+
   void getNext() {
     current = WordPair.random();
     notifyListeners();
@@ -55,59 +60,67 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var selectedindex = 0;
   var words = [];
+  List<Receta> listarecetas = [];
+
   @override
   Widget build(BuildContext context) {
     Widget page;
     switch (selectedindex) {
       case 0:
-        page = GeneratorPage();
+        page = SearchRecetaPage();
         break;
       case 1:
-        page = FavoritesPage();// te pone una cruz mientras no haya nada en esa pantalla a la que cambias
+        page =
+            FavoritesPage(); // te pone una cruz mientras no haya nada en esa pantalla a la que cambias
         break;
       case 2:
-        // aqui va añadir recetas
+        page = AddReceta();
+      // aqui va añadir recetas
       default:
         throw UnimplementedError('no widget for $selectedindex');
     }
-    return LayoutBuilder(
-        builder: (context,constraints) {
-          return Scaffold(
-            body: Row(
-              children: [
-                SafeArea(
-                  child: NavigationRail(
-                    extended: constraints.maxWidth>= 600,
-                    destinations: [
-                      NavigationRailDestination(
-                        icon: Icon(Icons.home),
-                        label: Text('Home'),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.favorite),
-                        label: Text('Favorites'),
-                      ),
-                    ],
-                    selectedIndex: selectedindex,//la segunda que aparece es la variable declarada (pa que no te rayes)
-                    onDestinationSelected: (value) {// está utilizando un lambda creo.
-                      // print('selected: $value');
-                      setState(() {
-                        selectedindex = value;
-                      });
-                    },
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+        body: Row(
+          children: [
+            SafeArea(
+              child: NavigationRail(
+                extended: constraints.maxWidth >= 600,
+                destinations: [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.home),
+                    label: Text('Home'),
                   ),
-                ),
-                Expanded(
-                  child: Container(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: page,
+                  NavigationRailDestination(
+                    icon: Icon(Icons.favorite),
+                    label: Text('Favorites'),
                   ),
-                ),
-              ],
+                  NavigationRailDestination(
+                    icon: Icon(Icons.add),
+                    label: Text('Añadir Recetas'),
+                  ),
+                ],
+                selectedIndex: selectedindex,
+                //la segunda que aparece es la variable declarada (pa que no te rayes)
+                onDestinationSelected: (value) {
+                  // está utilizando un lambda creo.
+                  // print('selected: $value');
+                  setState(() {
+                    selectedindex = value;
+                  });
+                },
+              ),
             ),
-          );
-        }
-    );
+            Expanded(
+              child: Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: page,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -142,113 +155,81 @@ class _FavoritesPageState extends State<FavoritesPage> {
             title: Text(pair.asLowerCase),
             trailing: IconButton(
               icon: Icon(Icons.delete),
-              onPressed: (){
-                setState((){
+              onPressed: () {
+                setState(() {
                   appState.favorites.remove(pair);
                 });
               },
             ),
           ),
-
       ],
     );
   }
 }
 
-class GeneratorPage extends StatelessWidget {
+class SearchRecetaPage extends StatefulWidget {
+  @override
+  _SearchRecetaPageState createState() => _SearchRecetaPageState();
+}
+
+class _SearchRecetaPageState extends State<SearchRecetaPage> {
+  List<Receta> _recetas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    recuperarRecetas(); // Recuperar recetas al iniciar la pantalla
+  }
+
+  void recuperarRecetas() async {
+    try {
+      final DatabaseReference databaseRef = FirebaseDatabase.instance.ref();
+      DataSnapshot snapshot = await databaseRef.child("recetas").get();
+
+      if (snapshot.exists) {
+        Map<dynamic, dynamic> recetas = snapshot.value as Map<dynamic, dynamic>;
+
+        List<Receta> listaRecetas = [];
+        recetas.forEach((key, value) {
+          Receta receta = Receta.fromMap(value);
+          listaRecetas.add(receta);
+        });
+
+        setState(() {
+          _recetas = listaRecetas;
+        });
+      } else {
+        print("No hay recetas disponibles.");
+      }
+    } catch (e) {
+      print("Error al recuperar recetas: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-    TextEditingController _controller = TextEditingController();
-    String inputText = '';
-
-    IconData icon;
-    IconData buscaricon;
-    buscaricon = Icons.search;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    String seleccion='opcion 1';
     return Center(
-
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              SizedBox(width: 250),
-
-              Expanded( // esto hace que el TextField ocupe todo el espacio disponible
-                child:
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Buscar nombre receta',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-              ),
-
-              SizedBox(width: 8), // Espaciado entre el campo de texto y el botón
-              ElevatedButton(
+          Text("Buscar Recetas"),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _recetas.length,
+              itemBuilder: (context, index) {
+                final receta = _recetas[index];
+                return ListTile(
+                  title: Text(receta.nombre),
+                    trailing: IconButton(
+                icon: Icon(Icons.favorite), // Ícono del botón
+                color: Colors.red,
                 onPressed: () {
-                  appState.toggleFavorite();
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(12), // Ajusta el padding del botón
-                  minimumSize: Size(50, 50), // Tamaño mínimo del botón
-                ),
-                child: Icon(Icons.search), // Ícono de búsqueda
-              ),
-              SizedBox(width:250),
-            ],
+                print("Añaddir a favoritos");
+                }),
+                  subtitle: Text('Categoría: ${receta.categoria}'),
 
-          ),
-          SizedBox(
-            width: 300,
-            height: 100,
-            child: DropdownExample(),
-
-          ),
-
-
-
-          BigCard(pair: pair),
-          Container(
-            color: Colors.red,
-            child: SizedBox(height: 40,
+                );
+              },
             ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: TextField(
-                //controller: _controller,
-                decoration: InputDecoration(
-                  labelText: 'Enter your text',
-                  border: OutlineInputBorder(),
-                )),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
           ),
         ],
       ),
@@ -256,60 +237,28 @@ class GeneratorPage extends StatelessWidget {
   }
 }
 
+
 // ...
 
-class BigCard extends StatelessWidget {
-  const BigCard({
-    super.key,
-    required this.pair,
-  });
-
-  final WordPair pair;
-
+class DropdownCategoria extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-
-    );
-    return Card(
-      color: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
-        ),
-      ),
-      elevation: 29,
-
-    );
-
-
-  }
+  _DropdownCategoriaState createState() => _DropdownCategoriaState();
 }
 
-
-
-
-class DropdownExample extends StatefulWidget {
-  @override
-  _DropdownExampleState createState() => _DropdownExampleState();
-}
-
-class _DropdownExampleState extends State<DropdownExample> {
-  String seleccion = "Opción 1"; // Se inicializa con una opción válida
+class _DropdownCategoriaState extends State<DropdownCategoria> {
+  String seleccion = "Economicas"; // Se inicializa con una opción válida
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Buscar Categoría"),
-        backgroundColor: Colors.greenAccent,
+      appBar: AppBar(
+        title: Text(
+          "Buscar Categoría",
+        ),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
       ),
-      backgroundColor: Colors.greenAccent,
-
+      backgroundColor: Colors.transparent,
       body: Center(
         child: DropdownButton<String>(
           value: seleccion, // Usamos la variable declarada
@@ -318,8 +267,15 @@ class _DropdownExampleState extends State<DropdownExample> {
               seleccion = newValue!; // Actualizamos la selección
             });
           },
-          items: <String>['Opción 1', 'Opción 2', 'Opción 3']
-              .map<DropdownMenuItem<String>>((String value) {
+
+          items: <String>[
+            'Economicas',
+            'Gourmet',
+            'Tradicionales',
+            'Saludables',
+            'Niños',
+            'Rapidas'
+          ].map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),

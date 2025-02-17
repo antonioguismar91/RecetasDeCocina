@@ -13,6 +13,7 @@ dependencies:
   firebase_core: ^3.7.0
   firebase_ui_auth: ^1.16.0
   firebase_ui_oauth_google: ^1.4.0
+  cloud_firestore: ^5.6.2
   firebase_database: ^11.3.1
   firebase_messaging: ^15.2.1
   google_sign_in: ^6.2.2
@@ -20,7 +21,11 @@ dependencies:
   english_words: ^4.0.0
   share_plus: ^10.1.4
   flutter_launcher_icons: ^0.14.3
+  fluttertoast: 8.2.12
   provider: ^6.0.0
+  sqflite: ^2.3.2
+  path_provider: ^2.1.2
+  path: ^1.8.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -35,6 +40,6 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
-   - "assets/logo.png"
+    - "assets/logo.png"
 
 
