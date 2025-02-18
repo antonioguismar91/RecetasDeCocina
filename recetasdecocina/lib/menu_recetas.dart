@@ -239,7 +239,7 @@ class FavoritesPage extends StatelessWidget {
     if (appState.favorites.isEmpty) {
       return Center(child: Text('No hay favoritos.'));
     }
-
+// jbjh
     return ListView.builder(
       itemCount: appState.favorites.length,
       itemBuilder: (context, index) {
