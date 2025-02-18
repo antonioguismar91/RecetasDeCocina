@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recetasdecocina/menu_recetas.dart';
 import 'register.dart';
 import 'user_dashboard.dart'; // Reemplaza con la pantalla a la que deseas navegar tras iniciar sesión
 
@@ -29,12 +30,12 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         // Redirigir a la pantalla de interfaz tras iniciar sesión
-        /*Navigator.pushReplacement(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ListScreen(), // Reemplazar con la pantalla adecuada
+            builder: (context) => menu_recetas(), // Reemplazar con la pantalla adecuada
           ),
-        );*/
+        );
       } on FirebaseAuthException catch (e) {
         String errorMessage;
 

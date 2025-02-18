@@ -19,9 +19,18 @@ class AddReceta extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text('Agregar Receta'),
+          title: const Text(
+            'Agregar Receta',
+            style: TextStyle(
+              color: Colors.white, // Cambia el color de las letras a blanco
+            ),
+          ),
+          backgroundColor: Colors.green.shade700, // Verde suave para la AppBar
         ),
-        body: const RecetaForm(),
+        body: Container(
+          color: Colors.green.shade300, // Fondo verde claro
+          child: const RecetaForm(),
+        ),
       ),
     );
   }
@@ -38,99 +47,165 @@ class _RecetaFormState extends State<RecetaForm> {
   final DatabaseReference databaseRef = FirebaseDatabase.instance.ref();
   String? categoriaSeleccionada;
   final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _categoriaController = TextEditingController();
   final TextEditingController _ingredientesController = TextEditingController();
   final TextEditingController _preparacionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            children: [
-              Container(
-                width: 600,
-                child: TextField(
-                  controller: _nombreController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre de la receta',
-                    border: OutlineInputBorder(),
 
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Container(
-                    width: 500,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black54, // Color del borde
-                        width: 1, // Grosor del borde
-                      ),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: DropdownCategoria(
-                      onChanged: (String seleccion) {
-                        setState(() {
-                          categoriaSeleccionada = seleccion;
-                          Fluttertoast.showToast(msg: seleccion);
-                        });
-                      },
-                    )),
-              ),
-            ],
+          // Campo de nombre de la receta
+          Text(
+            'Nombre de la receta',
+            style: TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            // Alinea los textos arriba
-            children: [
-              Container(
-                width: 300,
-                height: 300,
-                child: TextField(
-                  controller: _ingredientesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Ingredientes',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 7,
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: _nombreController,
+              decoration: InputDecoration(
+                hintText: 'Escriba el nombre',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: _preparacionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Preparación',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 7,
-                ),
-              ),
-            ],
+            ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              String nombre = _nombreController.text;
-              String ingredientes = _ingredientesController.text;
-              String preparacion = _preparacionController.text;
-              String categoria = categoriaSeleccionada!;
-              if (nombre.isNotEmpty &&
-                  ingredientes.isNotEmpty &&
-                  preparacion.isNotEmpty &&
-                  categoria.isNotEmpty) {
-                guardarReceta(nombre, ingredientes, preparacion, categoria);
-              } else {
-                Fluttertoast.showToast(msg: 'Rellena todos los datos');
-                Fluttertoast.showToast(msg: categoria);
-              }
-            },
-            child: const Text('Guardar Receta'),
+          const SizedBox(height: 20),
+          // Dropdown de categoría
+          Text(
+            'Categoría',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.black54),
+            ),
+            child: DropdownCategoria(
+              onChanged: (String seleccion) {
+                setState(() {
+                  categoriaSeleccionada = seleccion;
+                  Fluttertoast.showToast(msg: seleccion);
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Campo de ingredientes
+          Text(
+            'Ingredientes',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: _ingredientesController,
+              decoration: InputDecoration(
+                hintText: 'Escriba los ingredientes',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              maxLines: 7,
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Campo de preparación
+          Text(
+            'Preparación',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: _preparacionController,
+              decoration: InputDecoration(
+                hintText: 'Escriba los pasos de preparación',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              maxLines: 7,
+            ),
+          ),
+          const SizedBox(height: 30),
+          // Botón de guardar receta
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                String nombre = _nombreController.text;
+                String ingredientes = _ingredientesController.text;
+                String preparacion = _preparacionController.text;
+                String categoria = categoriaSeleccionada!;
+                if (nombre.isNotEmpty &&
+                    ingredientes.isNotEmpty &&
+                    preparacion.isNotEmpty &&
+                    categoria.isNotEmpty) {
+                  guardarReceta(nombre, ingredientes, preparacion, categoria);
+                } else {
+                  Fluttertoast.showToast(msg: 'Rellena todos los datos');
+                  Fluttertoast.showToast(msg: categoria);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white, // Botón blanco
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Guardar Receta',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black, // Texto en negro
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -164,26 +239,26 @@ class DropdownCategoria extends StatefulWidget {
 }
 
 class _DropdownCategoriaState extends State<DropdownCategoria> {
-  String? seleccion; // Se inicializa con una opción válida
+  String? seleccion;
   final List<String> categorias = [
-    'Economicas',
+    'Económicas',
     'Gourmet',
     'Tradicionales',
     'Saludables',
     'Niños',
-    'Rapidas'
+    'Rápidas'
   ];
 
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
       value: seleccion,
-      hint: Text("Seleccione una categoría"),
+      hint: const Text("Seleccione una categoría"),
       onChanged: (String? nuevaSeleccion) {
         setState(() {
           seleccion = nuevaSeleccion;
         });
-        widget.onChanged(nuevaSeleccion!); // 🔥 Enviamos la selección al padre
+        widget.onChanged(nuevaSeleccion!);
       },
       items: categorias.map((String categoria) {
         return DropdownMenuItem<String>(
@@ -194,5 +269,3 @@ class _DropdownCategoriaState extends State<DropdownCategoria> {
     );
   }
 }
-
-// ..
