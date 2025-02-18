@@ -2,9 +2,8 @@ import 'package:english_words/english_words.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recetasdecocina/Add_receta.dart';
-
 import 'Receta.dart';
+import 'Add_receta.dart';
 
 void main() {
   runApp(menu_recetas());
@@ -18,7 +17,7 @@ class menu_recetas extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'CocinApp',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
@@ -30,27 +29,17 @@ class menu_recetas extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var favorites = <WordPair>[];
-  var current = WordPair.random();
+  var favorites = <Receta>[];
 
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  void toggleFavorite() {
-    if (favorites.contains(current)) {
-      favorites.remove(current);
+  void toggleFavorite(Receta receta) {
+    if (favorites.contains(receta)) {
+      favorites.remove(receta);
     } else {
-      favorites.add(current);
+      favorites.add(receta);
     }
     notifyListeners();
   }
 }
-
-// ...
-
-// ...
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -59,8 +48,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedindex = 0;
-  var words = [];
-  List<Receta> listarecetas = [];
 
   @override
   Widget build(BuildContext context) {
@@ -70,99 +57,46 @@ class _MyHomePageState extends State<MyHomePage> {
         page = SearchRecetaPage();
         break;
       case 1:
-        page =
-            FavoritesPage(); // te pone una cruz mientras no haya nada en esa pantalla a la que cambias
+        page = FavoritesPage();
         break;
       case 2:
         page = AddReceta();
-      // aqui va añadir recetas
+        break;
       default:
-        throw UnimplementedError('no widget for $selectedindex');
-    }
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.add),
-                    label: Text('Añadir Recetas'),
-                  ),
-                ],
-                selectedIndex: selectedindex,
-                //la segunda que aparece es la variable declarada (pa que no te rayes)
-                onDestinationSelected: (value) {
-                  // está utilizando un lambda creo.
-                  // print('selected: $value');
-                  setState(() {
-                    selectedindex = value;
-                  });
-                },
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-}
-
-// ...
-
-class FavoritesPage extends StatefulWidget {
-  @override
-  State<FavoritesPage> createState() => _FavoritesPageState();
-}
-
-class _FavoritesPageState extends State<FavoritesPage> {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
+        throw UnimplementedError('No widget for $selectedindex');
     }
 
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                setState(() {
-                  appState.favorites.remove(pair);
-                });
+    return Scaffold(
+      body: Row(
+        children: [
+          SafeArea(
+            child: NavigationRail(
+              extended: MediaQuery.of(context).size.width >= 600,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Inicio'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite),
+                  label: Text('Favoritos'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.add),
+                  label: Text('Añadir Recetas'),
+                ),
+              ],
+              selectedIndex: selectedindex,
+              onDestinationSelected: (value) {
+                setState(() => selectedindex = value);
               },
             ),
           ),
-      ],
+          Expanded(
+            child: page,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -174,11 +108,13 @@ class SearchRecetaPage extends StatefulWidget {
 
 class _SearchRecetaPageState extends State<SearchRecetaPage> {
   List<Receta> _recetas = [];
+  final TextEditingController searchController = TextEditingController();
+  String seleccion = "Todas";
 
   @override
   void initState() {
     super.initState();
-    recuperarRecetas(); // Recuperar recetas al iniciar la pantalla
+    recuperarRecetas();
   }
 
   void recuperarRecetas() async {
@@ -208,83 +144,113 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Text("Buscar Recetas"),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _recetas.length,
-              itemBuilder: (context, index) {
-                final receta = _recetas[index];
-                return ListTile(
-                  title: Text(receta.nombre),
-                    trailing: IconButton(
-                icon: Icon(Icons.favorite), // Ícono del botón
-                color: Colors.red,
-                onPressed: () {
-                print("Añaddir a favoritos");
-                }),
-                  subtitle: Text('Categoría: ${receta.categoria}'),
+    var appState = context.watch<MyAppState>();
 
-                );
-              },
-            ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: const InputDecoration(
+                    labelText: 'Buscar receta',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
+              ),
+              SizedBox(width: 16),
+              DropdownButton<String>(
+                value: seleccion,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    seleccion = newValue!;
+                  });
+                },
+                items: ['Todas', 'Economicas', 'Gourmet', 'Saludables', 'Rapidas']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _recetas.length,
+            itemBuilder: (context, index) {
+              final receta = _recetas[index];
+
+              if (seleccion != "Todas" && receta.categoria != seleccion) {
+                return SizedBox.shrink();
+              }
+
+              return Card(
+                margin: EdgeInsets.all(8.0),
+                child: ListTile(
+                  leading: Icon(Icons.food_bank),
+                  title: Text(receta.nombre),
+                  subtitle: Container(
+                    height: 50,
+                    width: 150,
+                    child: ListView(
+                      children: [
+                        Text(
+                          'Categoria: ${receta.categoria}\n'
+                              'Ingredientes: ${receta.ingredientes}\n'
+                              'Preparacion: ${receta.preparacion}',
+                        )
+                      ],
+                    ),
+                  ),
+
+                  trailing: IconButton(
+                    icon: Icon(
+                      appState.favorites.contains(receta)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      appState.toggleFavorite(receta);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
 
-
-// ...
-
-class DropdownCategoria extends StatefulWidget {
-  @override
-  _DropdownCategoriaState createState() => _DropdownCategoriaState();
-}
-
-class _DropdownCategoriaState extends State<DropdownCategoria> {
-  String seleccion = "Economicas"; // Se inicializa con una opción válida
-
+class FavoritesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Buscar Categoría",
-        ),
-        backgroundColor: Colors.transparent,
-        centerTitle: true,
-      ),
-      backgroundColor: Colors.transparent,
-      body: Center(
-        child: DropdownButton<String>(
-          value: seleccion, // Usamos la variable declarada
-          onChanged: (String? newValue) {
-            setState(() {
-              seleccion = newValue!; // Actualizamos la selección
-            });
-          },
+    var appState = context.watch<MyAppState>();
 
-          items: <String>[
-            'Economicas',
-            'Gourmet',
-            'Tradicionales',
-            'Saludables',
-            'Niños',
-            'Rapidas'
-          ].map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
-      ),
+    if (appState.favorites.isEmpty) {
+      return Center(child: Text('No hay favoritos.'));
+    }
+// jbjh
+    return ListView.builder(
+      itemCount: appState.favorites.length,
+      itemBuilder: (context, index) {
+        final receta = appState.favorites[index];
+        return ListTile(
+          leading: Icon(Icons.favorite, color: Colors.red),
+          title: Text(receta.nombre),
+          subtitle: Text('Categoría: ${receta.categoria}'),
+
+        );
+      },
     );
   }
 }
-
-// ...
