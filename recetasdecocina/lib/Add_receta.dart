@@ -241,7 +241,7 @@ class DropdownCategoria extends StatefulWidget {
 class _DropdownCategoriaState extends State<DropdownCategoria> {
   String? seleccion;
   final List<String> categorias = [
-    'Económicas',
+    'Economicas',
     'Gourmet',
     'Tradicionales',
     'Saludables',
