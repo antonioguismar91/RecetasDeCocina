@@ -74,16 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         backgroundColor: Colors.green[700], // Verde oscuro
         actions: [
-          IconButton(
-            icon: const Icon(Icons.kitchen),
-            tooltip: 'Mis utensilios',
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.set_meal),
-            tooltip: 'Menú del día',
-            onPressed: () {},
-          ),
+
         ],
       ),
       body: Row(
@@ -205,7 +196,7 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
                     filtrarRecetas(); // Ejecutar el filtro al cambiar la categoría
                   });
                 },
-                items: ['Todas', 'Economicas', 'Gourmet', 'Saludables', 'Rapidas']
+                items: ['Todas', 'Economicas', 'Gourmet', 'Saludables', 'Rapidas', 'Niños', 'Clásicas']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -285,13 +276,64 @@ class FavoritesPage extends StatelessWidget {
       itemCount: appState.favorites.length,
       itemBuilder: (context, index) {
         final receta = appState.favorites[index];
-        return ListTile(
-          leading: Icon(Icons.favorite, color: Colors.red),
-          title: Text(
-            receta.nombre,
-            style: TextStyle(fontWeight: FontWeight.bold),
+
+        return Card(
+          elevation: 4, // Añadimos una pequeña sombra
+          margin: EdgeInsets.all(8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // Bordes redondeados
           ),
-          subtitle: Text('Categoría: ${receta.categoria}'),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  receta.nombre,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Categoría: ${receta.categoria}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Ingredientes: ${receta.ingredientes}', // Muestra el String de ingredientes tal cual
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Preparación: ${receta.preparacion}',
+                  style: TextStyle(fontSize: 14),
+                ),
+                SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: Icon(
+                      appState.favorites.contains(receta)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      appState.toggleFavorite(receta);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
