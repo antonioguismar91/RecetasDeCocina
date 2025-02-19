@@ -1,4 +1,3 @@
-import 'package:english_words/english_words.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +17,7 @@ class menu_recetas extends StatelessWidget {
       create: (context) => MyAppState(),
       child: MaterialApp(
         title: 'CocinApp',
+        color: Colors.white,
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
@@ -67,6 +67,25 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'CocinApp',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        ),
+        backgroundColor: Colors.green[700], // Verde oscuro
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.kitchen),
+            tooltip: 'Mis utensilios',
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.set_meal),
+            tooltip: 'Menú del día',
+            onPressed: () {},
+          ),
+        ],
+      ),
       body: Row(
         children: [
           SafeArea(
@@ -201,13 +220,20 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
           child: ListView.builder(
             itemCount: _recetasFiltradas.length,
             itemBuilder: (context, index) {
-              final receta = _recetasFiltradas[index]; // CORRECCIÓN: Usar la lista filtrada
+              final receta = _recetasFiltradas[index];
 
               return Card(
+                elevation: 4, // Añadimos una pequeña sombra
                 margin: EdgeInsets.all(8.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12), // Bordes redondeados
+                ),
                 child: ListTile(
-                  leading: Icon(Icons.food_bank),
-                  title: Text(receta.nombre),
+                  leading: Icon(Icons.fastfood, color: Colors.green[700]), // Icono más representativo
+                  title: Text(
+                    receta.nombre,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   subtitle: Container(
                     constraints: BoxConstraints(
                       maxHeight: 100, // Permite scroll dentro del texto
@@ -247,18 +273,25 @@ class FavoritesPage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
 
     if (appState.favorites.isEmpty) {
-      return Center(child: Text('No hay favoritos.'));
+      return Center(
+        child: Text(
+          'No hay favoritos.',
+          style: TextStyle(fontSize: 18),
+        ),
+      );
     }
-// jbjh
+
     return ListView.builder(
       itemCount: appState.favorites.length,
       itemBuilder: (context, index) {
         final receta = appState.favorites[index];
         return ListTile(
           leading: Icon(Icons.favorite, color: Colors.red),
-          title: Text(receta.nombre),
+          title: Text(
+            receta.nombre,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           subtitle: Text('Categoría: ${receta.categoria}'),
-
         );
       },
     );
