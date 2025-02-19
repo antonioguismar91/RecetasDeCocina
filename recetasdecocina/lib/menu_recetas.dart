@@ -108,6 +108,7 @@ class SearchRecetaPage extends StatefulWidget {
 
 class _SearchRecetaPageState extends State<SearchRecetaPage> {
   List<Receta> _recetas = [];
+  List<Receta> _recetasFiltradas = [];
   final TextEditingController searchController = TextEditingController();
   String seleccion = "Todas";
 
@@ -115,6 +116,19 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
   void initState() {
     super.initState();
     recuperarRecetas();
+    searchController.addListener(filtrarRecetas);
+  }
+
+  void filtrarRecetas() {
+    String query = searchController.text.toLowerCase();
+
+    setState(() {
+      _recetasFiltradas = _recetas.where((receta) {
+        bool coincideCategoria = seleccion == "Todas" || receta.categoria == seleccion;
+        bool coincideNombre = receta.nombre.toLowerCase().contains(query);
+        return coincideCategoria && coincideNombre;
+      }).toList();
+    });
   }
 
   void recuperarRecetas() async {
@@ -133,6 +147,7 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
 
         setState(() {
           _recetas = listaRecetas;
+          _recetasFiltradas = List.from(listaRecetas); // Copia inicial de todas las recetas
         });
       } else {
         print("No hay recetas disponibles.");
@@ -168,6 +183,7 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
                 onChanged: (String? newValue) {
                   setState(() {
                     seleccion = newValue!;
+                    filtrarRecetas(); // Ejecutar el filtro al cambiar la categoría
                   });
                 },
                 items: ['Todas', 'Economicas', 'Gourmet', 'Saludables', 'Rapidas']
@@ -183,13 +199,9 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
         ),
         Expanded(
           child: ListView.builder(
-            itemCount: _recetas.length,
+            itemCount: _recetasFiltradas.length,
             itemBuilder: (context, index) {
-              final receta = _recetas[index];
-
-              if (seleccion != "Todas" && receta.categoria != seleccion) {
-                return SizedBox.shrink();
-              }
+              final receta = _recetasFiltradas[index]; // CORRECCIÓN: Usar la lista filtrada
 
               return Card(
                 margin: EdgeInsets.all(8.0),
@@ -197,19 +209,17 @@ class _SearchRecetaPageState extends State<SearchRecetaPage> {
                   leading: Icon(Icons.food_bank),
                   title: Text(receta.nombre),
                   subtitle: Container(
-                    height: 50,
-                    width: 150,
-                    child: ListView(
-                      children: [
-                        Text(
-                          'Categoria: ${receta.categoria}\n'
-                              'Ingredientes: ${receta.ingredientes}\n'
-                              'Preparacion: ${receta.preparacion}',
-                        )
-                      ],
+                    constraints: BoxConstraints(
+                      maxHeight: 100, // Permite scroll dentro del texto
+                    ),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        'Categoría: ${receta.categoria}\n'
+                            'Ingredientes: ${receta.ingredientes}\n'
+                            'Preparación: ${receta.preparacion}',
+                      ),
                     ),
                   ),
-
                   trailing: IconButton(
                     icon: Icon(
                       appState.favorites.contains(receta)
